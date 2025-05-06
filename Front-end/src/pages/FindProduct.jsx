@@ -25,7 +25,7 @@ const FindProduct=  ()=> {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Rechercher un médicament ou un article..."
-            className="w-full px-5 py-4 pr-12 text-base rounded-lg border-2 border-gray-200 focus:border-blue-500 focus:outline-none transition-all duration-300 shadow-sm"
+            className="w-full px-5 py-4 pr-12 text-base rounded-lg border-2 border-gray-200 focus:border-[#00cfc1] focus:outline-none transition-all duration-300 shadow-sm"
           />
           {searchTerm && (
             <button 

@@ -1,9 +1,11 @@
 import { Outlet } from 'react-router-dom';
 import Logo from '../assets/logo_quickmed-removebg-preview.png';
 import Menu from '../assets/bars-solid.svg';
-import { Link } from 'react-router-dom';
+import { Link , useNavigate} from 'react-router-dom';
 import SidebarMenu from '../components/SidebarMenu';
 import { useState } from 'react';
+
+//import PharmacyPartnership from '../pages/pharmacie/PharmacyPartnership';
 //import { useAuthNavigation } from '../hooks/AuthNavigationContext';
 
 //const { goToAuthPage } = useAuthNavigation();
@@ -11,6 +13,8 @@ import { useState } from 'react';
 
 function Layout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  const navigate = useNavigate();
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
@@ -49,7 +53,7 @@ function Layout() {
         {/* Bouton Se connecter */}
         <div>
           <button   className="hidden md:block bg-[#00CFC1] text-white px-6 py-2 rounded-full">
-             <Link to="/auth" >Se connecter</Link>
+             <Link to="/login" >Se connecter</Link>
           </button>
         </div>
       </header>
@@ -78,7 +82,9 @@ function Layout() {
             </div>
             
             <div className="flex items-center justify-center md:justify-end md:w-1/2">
-              <button className="bg-white text-[#00CFC1] font-medium py-3 px-6 rounded-lg flex items-center hover:bg-gray-100 transition-colors">
+              <button
+                onClick={() => navigate('/devenirepartenaire')}
+                className="bg-white text-[#00CFC1] font-medium py-3 px-6 rounded-lg flex items-center hover:bg-gray-100 transition-colors">
                 Devenir partenaire
                 <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
@@ -105,7 +111,7 @@ function Layout() {
               <Link to="/contact" className="rounded-md px-4 py-2 hover:text-[#00CFC1]">Blog</Link>
            </nav>
            <button className="flex items-center justify-between bg-white text-[#002341] rounded-full px-6 py-3 shadow-md w-50 max-w-xs">
-               <span className="text-base font-medium"><Link to="/auth">Inscription</Link></span>
+               <span className="text-base font-medium"><Link to="/register">Inscription</Link></span>
             <span className="flex items-center justify-center bg-[#00CFC1] text-white rounded-full w-8 h-8 ml-4">
               <svg
                 xmlns="http://www.w3.org/2000/svg"

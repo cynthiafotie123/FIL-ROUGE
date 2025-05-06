@@ -14,8 +14,8 @@ return [
     */
 
     'defaults' => [
-        'guard' => env('AUTH_GUARD', 'web'),
-        'passwords' => env('AUTH_PASSWORD_BROKER', 'users'),
+        'guard' => env('AUTH_GUARD', 'api'),
+        'passwords' => env('AUTH_PASSWORD_BROKER', 'authentifications'),
     ],
 
     /*
@@ -54,6 +54,9 @@ return [
             'hash' => false,
             ],
     ],
+
+
+    
 
     /*
     |--------------------------------------------------------------------------
@@ -112,7 +115,7 @@ return [
     'passwords' => [
         'authentifications' => [
             'provider' => 'authentifications',
-            'table' => env('AUTH_PASSWORD_RESET_TOKEN_TABLE', 'password_reset_tokens'),
+            'table' => env('AUTH_PASSWORD_RESET_TOKEN_TABLE', 'personnal_access_tokens'),
             'expire' => 60,
             'throttle' => 60,
         ],

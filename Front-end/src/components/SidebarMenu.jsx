@@ -2,6 +2,7 @@ import React from 'react';
 import { X, Home, Package, MapPin, ShoppingCart, Star, User, History, CreditCard, LogOut } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import { useAuthen } from '../hooks/AuthenContext';
+import LogoutButton from '../components/LogoutButton';
 
 const menuItems = [
   { to: '/', label: 'Home', icon: <Home size={18} /> },
@@ -63,24 +64,7 @@ export default function SidebarMenu({ isOpen, onClose }) {
           </NavLink>
         ))}
         <div className="mt-auto p-3 border-t border-gray-200">
-          <button
-            onClick={() => {
-              logout();
-              onClose();
-            }}
-            className="
-              w-full
-              flex items-center gap-2
-              px-3 py-2
-              text-sm text-red-600
-              rounded-md
-              hover:bg-red-50
-              transition-colors
-            "
-          >
-            <LogOut className="w-5 h-5" />
-            Déconnexion
-          </button>
+      <LogoutButton/>
         </div>
       </nav>
     </aside>

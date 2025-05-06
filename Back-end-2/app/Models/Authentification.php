@@ -41,6 +41,6 @@ class Authentification extends Authenticatable
     // Méthode pour vérifier si l'utilisateur a un rôle spécifique
     public function hasRole($roleName)
     {
-        return $this->User->roles()->where('role_name', $roleName)->exists();
+        return $this->utilisateur->roles()->where('role_name', $roleName)->exists();
     }
 }

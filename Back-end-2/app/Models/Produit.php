@@ -28,7 +28,7 @@ class Produit extends Model
     {
         return $this->hasManyThrough(
             Pharmacy::class,
-            Stock::class,
+            Stocks::class,
             'id_produit',        // Foreign key on stock table
             'id_Pharmacie',      // Foreign key on pharmacy table
             'id_produit',        // Local key on product table

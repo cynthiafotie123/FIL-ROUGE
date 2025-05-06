@@ -222,10 +222,13 @@ public function getUserRoles()
     // Inscription d'un administrateur
     public function registerAdmin(Request $request)
     {
-        // Vérification que la demande provient d'un admin existant
-        if (!Auth::check() || !Auth::user()->roles('admin')) {
-            return response()->json(['message' => 'Non autorisé'], 403);
-        }
+        // Utilisez le guard 'authentification'
+    $authUser = Auth::guard('api')->user();
+
+    // Vérifiez si l'utilisateur est connecté et a le rôle 'admin'
+    if (!$authUser || !$authUser->utilisateur || !$authUser->utilisateur->roles()->where('role_name', 'admin')->exists()) {
+        return response()->json(['message' => 'Non autorisé'], 403);
+    }
 
         $validator = Validator::make($request->all(), [
             'nom' => 'required|string|max:255',
@@ -301,7 +304,8 @@ public function getUserRoles()
 
         // Récupération des rôles
         $rolename=['client', 'admin', 'pharmacie'];
-        $roles = $auth->getRole()->select('roles.role_name')->pluck('role_name')->toArray();
+        $roles = $auth->utilisateur->roles->pluck('role_name')->toArray();
+
 
 
         return response()->json([

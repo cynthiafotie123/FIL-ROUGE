@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\AdminController;
+use App\Http\Controllers\Api\DashboardController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -49,4 +50,29 @@ Route::middleware('auth:sanctum')->prefix('admin')->group(function () {
     Route::post('/users/{user}/assign-role', [AdminController::class, 'assignRole']);
     Route::get('/roles', [AdminController::class, 'getRoles']);
     Route::get('/users', [AdminController::class, 'getUsersWithRoles']);
+});
+
+// Routes pour le dashboard client
+Route::middleware(['auth:sanctum'])->group(function () {
+    // Recherche
+    Route::get('/search', [DashboardController::class, 'search']);
+    
+    // Récupérer les données du dashboard
+    Route::get('/dashboard/data', [DashboardController::class, 'getDashboardData']);
+    
+    // Gestion des commandes
+    Route::post('/commandes', [DashboardController::class, 'passerCommande']);
+    Route::get('/commandes/{id}', [DashboardController::class, 'getCommandeDetails']);
+    
+    // Gestion des favoris
+    Route::post('/favoris', [DashboardController::class, 'addToFavorites']);
+    Route::delete('/favoris/{id}', [DashboardController::class, 'removeFromFavorites']);
+    
+    // Gestion du profil
+    Route::put('/profile', [DashboardController::class, 'updateProfile']);
+    
+    // Gestion des adresses
+    Route::post('/adresses', [DashboardController::class, 'addAddress']);
+    Route::put('/adresses/{id}', [DashboardController::class, 'updateAddress']);
+    Route::delete('/adresses/{id}', [DashboardController::class, 'deleteAddress']);
 });
