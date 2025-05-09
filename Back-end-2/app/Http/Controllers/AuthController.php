@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Models\Role;
 use App\Models\Pharmacie;
 use Laravel\Socialite\Facades\Socialite;
+use Illuminate\Support\Facades\DB;
 
 class AuthController extends Controller
 {
@@ -107,6 +108,7 @@ public function getUserRoles()
             'horaire_fermeture' => 'required',
             'latitude' => 'nullable|numeric',
             'longitude' => 'nullable|numeric',
+            
         ]);
 
         if ($validator->fails()) {
@@ -119,9 +121,10 @@ public function getUserRoles()
             'telephone' => $request->telephone,
             'adresse' => $request->adresse,
             'horaire_d_ouverture' => $request->horaire_d_ouverture,
-            'horaire_fermetur' => $request->horaire_fermetur,
+            'horaire_fermeture' => $request->horaire_fermeture,
             'latitude' => $request->latitude,
             'longitude' => $request->longitude,
+        
         ]);
 
         // Création de l'utilisateur associé à la pharmacie
@@ -163,115 +166,158 @@ public function getUserRoles()
 
 
     public function createFirstAdmin(Request $request)
-{
-    // Vérifiez si aucun admin n'existe dans le système
-    $adminExists = Role::where('role_name', 'admin')
-                      ->whereHas('users')->exists();
-    
-    if ($adminExists) {
-        return response()->json(['message' => 'Un administrateur existe déjà'], 403);
-    }
-    
-    $validator = Validator::make($request->all(), [
-        'nom' => 'required|string|max:255',
-        'telephone' => 'required|string|max:9',
-        'email' => 'required|string|email|max:255|unique:authentifications',
-        'password' => 'required|string|min:8',
-    ]);
-    
-    if ($validator->fails()) {
-        return response()->json($validator->errors(), 422);
-    }
-    
-    // Création de l'utilisateur
-    $utilisateur = User::create([
-        'nom' => $request->nom,
-        'telephone' => $request->telephone,
-        'email' => $request->email,
-    ]);
-    
-    // Création de l'authentification
-    $auth = Authentification::create([
-        'email' => $request->email,
-        'password' => Hash::make($request->password),
-        'user_id' => $utilisateur->user_id,
-    ]);
-
-    $auth->is_connect = true;
-    $auth->save();
-    
-    // Attribution du rôle "admin"
-    $roleAdmin = Role::where('role_name', 'admin')->first();
-    if ($roleAdmin) {
-        $utilisateur->roles()->attach($roleAdmin->idRole, ['role_name' => 'admin']);
-    }
-    
-    $token = $auth->createToken('auth_token')->plainTextToken;
-    
-    return response()->json([
-        'message' => 'Premier administrateur créé avec succès',
-        'user' => $utilisateur,
-        'role' => 'admin',
-        'auth_token' => $token,
-        'token_type' => 'Bearer',
-        'is_connect' => true,
-       
-    ], 201);
-}
-
-    // Inscription d'un administrateur
-    public function registerAdmin(Request $request)
     {
-        // Utilisez le guard 'authentification'
-    $authUser = Auth::guard('api')->user();
-
-    // Vérifiez si l'utilisateur est connecté et a le rôle 'admin'
-    if (!$authUser || !$authUser->utilisateur || !$authUser->utilisateur->roles()->where('role_name', 'admin')->exists()) {
-        return response()->json(['message' => 'Non autorisé'], 403);
-    }
-
+        // Vérifier si un admin existe déjà
+        $adminExists = User::whereHas('roles', function($query) {
+            $query->where('roles.role_name', 'admin');
+        })->exists();
+        
+        if ($adminExists) {
+            return response()->json([
+                'message' => 'Un administrateur existe déjà dans le système'
+            ], 403);
+        }
+        
+        // Validation des données
         $validator = Validator::make($request->all(), [
             'nom' => 'required|string|max:255',
             'telephone' => 'required|string|max:9',
             'email' => 'required|string|email|max:255|unique:authentifications',
             'password' => 'required|string|min:8',
         ]);
-
+        
         if ($validator->fails()) {
-            return response()->json($validator->errors(), 422);
+            return response()->json([
+                'message' => 'Erreur de validation',
+                'errors' => $validator->errors()
+            ], 422);
         }
-
-        // Création de l'utilisateur
-        $utilisateur = User::create([
-            'nom' => $request->nom,
-            'telephone' => $request->telephone,
-        ]);
-
-        // Création de l'authentification
-        $auth = Authentification::create([
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'user_id' => $utilisateur->user_id,
-        ]);
-
-        $auth->is_connect = true;
-        $auth->save();
-
-        // Attribution du rôle "admin"
-        $roleAdmin = Role::where('role_name', 'admin')->first();
-        if ($roleAdmin) {
+        
+        try {
+            DB::beginTransaction();
+            
+            // Création de l'utilisateur
+            $utilisateur = User::create([
+                'nom' => $request->nom,
+                'telephone' => $request->telephone,
+                'email' => $request->email,
+            ]);
+            
+            // Création de l'authentification
+            $auth = Authentification::create([
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+                'user_id' => $utilisateur->user_id,
+                'is_connect' => true
+            ]);
+            
+            // Récupération ou création du rôle admin
+            $roleAdmin = Role::firstOrCreate(
+                ['role_name' => 'admin'],
+                ['description' => 'Administrateur système']
+            );
+            
+            // Attribution du rôle admin à l'utilisateur avec le role_name
             $utilisateur->roles()->attach($roleAdmin->idRole, ['role_name' => 'admin']);
+            
+            // Génération du token
+            $token = $auth->createToken('auth_token')->plainTextToken;
+            
+            DB::commit();
+            
+            return response()->json([
+                'message' => 'Premier administrateur créé avec succès',
+                'user' => $utilisateur->load('roles'),
+                'access_token' => $token,
+                'token_type' => 'Bearer',
+                'is_connect' => true
+            ], 201);
+            
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Erreur lors de la création de l\'administrateur',
+                'error' => $e->getMessage()
+            ], 500);
         }
-        $token = $auth->createToken('auth_token')->plainTextToken;
+    }
 
-        return response()->json([
-            'message' => 'Administrateur créé avec succès',
-            'user' => $utilisateur,
-            'role' => 'admin',
-            'auth_token'=> $token,
-            'token_type' => 'Bearer',
-            'is_connect' => true,
-        ], 201);
+    // Inscription d'une pharnacie
+    public function registerAdmin(Request $request)
+    {
+        // Vérifier si l'utilisateur actuel est admin
+        $authUser = Auth::user();
+        
+        if (!$authUser || !$authUser->utilisateur || !$authUser->utilisateur->roles()
+            ->where('role_name', 'admin')->exists()) {
+            return response()->json([
+                'message' => 'Accès non autorisé. Droits d\'administrateur requis.'
+            ], 403);
+        }
+        
+        // Validation des données
+        $validator = Validator::make($request->all(), [
+            'nom' => 'required|string|max:255',
+            'telephone' => 'required|string|max:9',
+            'email' => 'required|string|email|max:255|unique:authentifications',
+            'password' => 'required|string|min:8',
+        ]);
+        
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Erreur de validation',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+        
+        try {
+            DB::beginTransaction();
+            
+            // Création de l'utilisateur
+            $utilisateur = User::create([
+                'nom' => $request->nom,
+                'telephone' => $request->telephone,
+                'email' => $request->email,
+            ]);
+            
+            // Création de l'authentification
+            $auth = Authentification::create([
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+                'user_id' => $utilisateur->user_id,
+                'is_connect' => true
+            ]);
+            
+            // Récupération du rôle admin
+            $roleAdmin = Role::where('role_name', 'admin')->first();
+            
+            if (!$roleAdmin) {
+                throw new \Exception('Le rôle admin n\'existe pas dans le système');
+            }
+            
+            // Attribution du rôle admin à l'utilisateur
+            $utilisateur->roles()->attach($roleAdmin->idRole);
+            
+            // Génération du token
+            $token = $auth->createToken('auth_token')->plainTextToken;
+            
+            DB::commit();
+            
+            return response()->json([
+                'message' => 'Administrateur créé avec succès',
+                'user' => $utilisateur->load('roles'),
+                'access_token' => $token,
+                'token_type' => 'Bearer',
+                'is_connect' => true
+            ], 201);
+            
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Erreur lors de la création de l\'administrateur',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     // Connexion

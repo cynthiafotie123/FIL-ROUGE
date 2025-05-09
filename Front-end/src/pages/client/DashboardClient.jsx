@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import LogoutButton from '../../components/LogoutButton';
 import axios from 'axios';
 import Logo from '../../assets/logo_quickmed-removebg-preview.png';
-import { Search, Bell, ShoppingCart, User, Heart, MapPin, UserCircle } from 'lucide-react';
+import { Search, Bell, ShoppingCart, User, Heart, MapPin, UserCircle, X } from 'lucide-react';
+import XANAX from '../../assets/xanax.png';
 
 // Configuration de l'API
 const api = axios.create({
@@ -14,6 +15,11 @@ const api = axios.create({
   },
   withCredentials: true
 });
+
+
+
+
+
 
 const DashboardClient = () => {
   const [activeTab, setActiveTab] = useState('orders');
@@ -147,14 +153,20 @@ const DashboardClient = () => {
                       </div>
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-4">
-                          <div className="w-16 h-16 bg-gray-100 rounded-lg"></div>
+                          <div className="w-16 h-16 bg-gray-100 rounded-lg">
+                            <img 
+                              src={XANAX}
+                              alt={`Produit ${order}`}
+                              className="w-full h-full object-cover object-top rounded-lg"
+                            />
+                          </div>
                           <div>
                             <h4 className="font-medium">Produit {order}</h4>
                             <p className="text-sm text-gray-500">Quantité: 1</p>
                           </div>
                         </div>
                         <div className="text-right">
-                          <p className="font-medium">€19.99</p>
+                          <p className="font-medium">25 000 Fcfa</p>
                           <button className="text-[#00cfc1] text-sm hover:text-[#002341]">
                             Voir les détails
                           </button>
@@ -182,7 +194,7 @@ const DashboardClient = () => {
                       <h3 className="font-medium">Produit {item}</h3>
                       <p className="text-sm text-gray-500 mb-2">Description courte du produit</p>
                       <div className="flex justify-between items-center">
-                        <span className="font-medium">15,90 €</span>
+                        <span className="font-medium">10 000 Fcfa</span>
                         <button className="text-[#00cfc1] hover:text-[#002341] cursor-pointer">
                           <ShoppingCart className="w-5 h-5" />
                         </button>

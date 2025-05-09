@@ -5,6 +5,15 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ProduitController;
 use App\Http\Controllers\DashboardClientController;
+use App\Http\Controllers\PharmacieValidationController;
+use App\Http\Controllers\AdminController;
+use App\Models\Role;
+use App\Http\Controllers\AdminDashboardController;
+use App\Http\Controllers\PharmacieController;
+use App\Http\Controllers\PharmacieTestController;
+use App\Models\Pharmacie;
+use App\Http\Controllers\PharmacieDashboardController;
+
 
 
 //1-ROUTE REGISTRATION ET LOGIN
@@ -28,7 +37,8 @@ Route::post('/login/pharmacie', [AuthController::class, 'loginPharmacie']);
 
 //1-3 admin
 Route::post('/create-first-admin', [AuthController::class, 'createFirstAdmin']);
-Route::post('/register/admin', [AuthController::class, 'registerAdmin']);
+Route::middleware('auth:sanctum')->post('/register-admin', [AuthController::class, 'registerAdmin']);
+
 
 // Connexion (login)
 // Les routes protégées nécessitent l'auth via Sanctum
@@ -116,3 +126,87 @@ Route::middleware(['auth:sanctum'])->group(function () {
 });
 
 // ... existing code ...
+
+// Routes pour la validation des pharmacies
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/admin/pending-pharmacies', [PharmacieValidationController::class, 'getPendingPharmacies']);
+    Route::post('/admin/validate-pharmacie/{id}', [PharmacieValidationController::class, 'validatePharmacie']);
+    Route::post('/admin/reject-pharmacie/{id}', [PharmacieValidationController::class, 'rejectPharmacie']);
+});
+
+// ... existing code ...
+
+// Routes pour l'administration
+// Dans routes/api.php
+Route::middleware(['auth:sanctum'])->prefix('admin')->group(function () {
+        Route::get('/dashboard', [AdminDashboardController::class, 'index']);
+        // Autres routes admin...
+    });
+
+
+    // Dashboard
+    // Dashboard
+   
+    
+    // Gestion des produits
+    Route::post('/produits', [AdminDashboardController::class, 'storeProduit']);
+    
+    // Gestion des pharmacies
+    Route::post('/pharmacies', [AdminDashboardController::class, 'storePharmacie']);
+    Route::delete('/pharmacies/{id}', [AdminDashboardController::class, 'deletePharmacie']);
+    
+    // Gestion des commandes
+    Route::put('/commandes/{id}', [AdminDashboardController::class, 'updateCommande']);
+    
+    // Gestion des paiements
+    Route::put('/paiements/{id}', [AdminDashboardController::class, 'updatePaiement']);
+    
+    // Gestion des utilisateurs
+    Route::get('/users', [AdminController::class, 'getUsers']);
+    Route::get('/users/{id}', [AdminController::class, 'getUser']);
+    Route::put('/users/{id}', [AdminController::class, 'updateUser']);
+    Route::delete('/users/{id}', [AdminController::class, 'deleteUser']);
+    
+    // Gestion des pharmacies
+    Route::get('/pharmacies', [AdminController::class, 'getPharmacies']);
+    Route::get('/pharmacies/{id}', [AdminController::class, 'getPharmacie']);
+    Route::put('/pharmacies/{id}', [AdminController::class, 'updatePharmacie']);
+    Route::delete('/pharmacies/{id}', [AdminController::class, 'deletePharmacie']);
+    
+    // Validation des pharmacies
+    Route::get('/pending-pharmacies', [PharmacieValidationController::class, 'getPendingPharmacies']);
+    Route::post('/validate-pharmacie/{id}', [PharmacieValidationController::class, 'validatePharmacie']);
+    Route::post('/reject-pharmacie/{id}', [PharmacieValidationController::class, 'rejectPharmacie']);
+    
+    // Statistiques et rapports
+    Route::get('/stats', [AdminController::class, 'getStats']);
+    Route::get('/reports/sales', [AdminController::class, 'getSalesReport']);
+    Route::get('/reports/users', [AdminController::class, 'getUsersReport']);
+
+
+// ... existing code ...
+
+Route::get('/pharmacies-search/search', [PharmacieController::class, 'search']);
+
+
+//dashboardpharmacie
+
+
+Route::middleware(['auth:sanctum'])->prefix('pharmacie')->group(function () {
+    Route::get('/dashboard', [PharmacieDashboardController::class, 'dashboard']);
+
+    // CRUD Produits
+    Route::get('/produits', [PharmacieDashboardController::class, 'indexProduits']);
+    Route::post('/produits', [PharmacieDashboardController::class, 'storeProduit']);
+    Route::get('/produits/{id}', [PharmacieDashboardController::class, 'showProduit']);
+    Route::put('/produits/{id}', [PharmacieDashboardController::class, 'updateProduit']);
+    Route::delete('/produits/{id}', [PharmacieDashboardController::class, 'destroyProduit']);
+
+    // Commandes liées à la pharmacie
+    Route::get('/commandes', [PharmacieDashboardController::class, 'indexCommandes']);
+    Route::put('/commandes/{id}', [PharmacieDashboardController::class, 'updateCommande']);
+
+    // Paiements liés aux produits de la pharmacie
+    Route::get('/paiements', [PharmacieDashboardController::class, 'indexPaiements']);
+    Route::put('/paiements/{id}', [PharmacieDashboardController::class, 'updatePaiement']);
+});

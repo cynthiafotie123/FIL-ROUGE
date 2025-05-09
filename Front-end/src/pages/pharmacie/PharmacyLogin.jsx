@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import { Building2, Mail, Lock, Eye, EyeOff, AlertCircle } from 'lucide-react';
-import {Link} from 'react-router-dom'
+import {Link, useNavigate} from 'react-router-dom'
 import Logo from '../../assets/logo_quickmed-removebg-preview.png';
+import axios from 'axios';
+
+
 
 
 const PharmacyLogin = ({ setCurrentPage }) => {
@@ -12,6 +15,8 @@ const PharmacyLogin = ({ setCurrentPage }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -26,36 +31,30 @@ const PharmacyLogin = ({ setCurrentPage }) => {
     setError('');
 
     try {
-      // API call to your Laravel backend
-      const response = await fetch('/api/login/pharmacie', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(credentials)
+      const response = await axios.post("http://localhost:8000/api/login", {
+        email: credentials.email,
+        password: credentials.password
       });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Erreur de connexion');
+  
+      console.log("Login success:", response.data);
+      // Rediriger ou faire autre chose après succès
+      navigate('/pharmacy/dashboard');
+      // ou autre route
+    } catch (error) {
+      console.error("Login error:", error);
+      if (error.response && error.response.data.errors) {
+        setError("Erreur de validation : " + JSON.stringify(error.response.data.errors));
+      } else if (error.response && error.response.data.message) {
+        setError(error.response.data.message);
+      } else {
+        setError("Une erreur s'est produite lors de la connexion.");
       }
-
-      // Save token to localStorage or session
-      localStorage.setItem('pharmacie_token', data.token);
-      localStorage.setItem('pharmacie_user', JSON.stringify(data.user));
-
-      // Redirect to pharmacy dashboard
-      setCurrentPage('PharmacyDashboard');
-      
-    } catch (err) {
-      console.error('Login error:', err);
-      setError(err.message || 'Une erreur est survenue lors de la connexion');
     } finally {
       setIsLoading(false);
     }
   };
-
+  
+  
   return (
     <div className="max-w-md mx-auto">
       <div className="bg-white rounded-xl shadow-md p-8">

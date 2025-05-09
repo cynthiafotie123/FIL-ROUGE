@@ -67,16 +67,7 @@ function Home() {
                         </div>
 
 
-                        <div className="w-3/4 h-2/10 flex justify-center">
-                           
-                            <input type="text" className="w-4/5 h-full border-2 border-[#00cfc1] text-black bg-white  focus:outline-none  focus:border-[#002341] ,
-                         focus:ring-2 ,focus:ring-[#002341],transition duration-150 placeholder:text-gray-500 placeholder:text-center" placeholder="Localiser une PHARMACIE" 
-                         />
-
-                            <button className='flex  justify-center items-center w-1/5 h-full bg-[#002341]'>
-                                <MapPin className=" w-10 h-10 text-red-500" />
-                            </button>
-                        </div>
+                        
                 </div>
 
 

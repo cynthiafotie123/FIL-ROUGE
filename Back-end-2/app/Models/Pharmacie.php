@@ -25,11 +25,17 @@ class Pharmacie extends Model
     
     public function utilisateurs()
     {
-        return $this->hasMany(Utilisateur::class, 'id_pharmacie', 'id_Pharmacie');
+        return $this->hasMany(User::class, 'id_pharmacie', 'id_Pharmacie');
     }
+
 
     public function stocks()
     {
         return $this->hasMany(Stock::class, 'id_Pharmacie');
+    }
+
+    public function commandes()
+    {
+        return $this->hasManyThrough(Commande::class, User::class, 'id_pharmacie', 'user_id', 'id_Pharmacie', 'id');
     }
 }

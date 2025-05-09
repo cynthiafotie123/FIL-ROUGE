@@ -3,9 +3,9 @@ import Layout from './layouts/Layout';
 import Home from './pages/Home';
 import Products from './pages/Products';
 import ProductDetail from './pages/ProductDetail';
+import LoginAdmin from './pages/LoginAdmin';
+import DashboardAdmin from './pages/DashboardAdmin';
 import './index.css';
-//import Cart from './pages/Cart';
-//import About from './pages/About';
 
 function App() {
   return (
@@ -15,8 +15,9 @@ function App() {
           <Route index element={<Home />} />
           <Route path="produits" element={<Products />} />
           <Route path="produits/:id" element={<ProductDetail />} />
-        
         </Route>
+        <Route path="/login/admin" element={<LoginAdmin />} />
+        <Route path="/admin/dashboard" element={<DashboardAdmin />} />
       </Routes>
     </BrowserRouter>
   );

@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Commande extends Model
 {
-    protected $table = 'commande';
+    protected $table = 'commandes';
     protected $primaryKey = 'idCommande';
 
     protected $fillable = [
@@ -24,11 +24,6 @@ class Commande extends Model
         return $this->belongsTo(User::class, 'user_id', 'user_id');
     }
 
-    public function role()
-    {
-        return $this->belongsTo(Role::class, 'idRole', 'idRole');
-    }
-
     public function produit()
     {
         return $this->belongsTo(Produit::class, 'id_produit', 'id_produit');
@@ -37,5 +32,10 @@ class Commande extends Model
     public function payement()
     {
         return $this->hasOne(Payement::class, 'idCommande', 'idCommande');
+    }
+
+    public function pharmacie()
+    {
+        return $this->belongsTo(Pharmacie::class, 'id_pharmacie', 'id_Pharmacie');
     }
 }
